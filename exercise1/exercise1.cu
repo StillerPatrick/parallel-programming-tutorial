@@ -9,7 +9,7 @@ int handleCudaError(cudaError_t cut,const char* file, int line)
 {
 	if(cut != cudaSuccess)
 		{
-		printf("%s %s %d \n",cudaGetErrorString(cut),__FILE__,__LINE__);
+		printf("%s %s %d \n",cudaGetErrorString(cut),file,line);
 		return -1 ;
 		}
 	return 0;  
