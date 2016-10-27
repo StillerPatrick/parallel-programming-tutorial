@@ -19,14 +19,14 @@ int handleCudaError(cudaError_t cut,const char* file, int line)
 
 //================== CUDA FUNCTIONS ====================
 
-__global__ void random_init(int n, int *x, int*y)
+__global__ void random_init(int n, double *x, double *y)
 {
 	int i = blockIdx.x * blockDim.x + threadIdx.x; // Calculate current Thread
 	
 	if (i < n)
 	{
-	x[i] = ((unsigned long long int)950706376*i) % 0x7FFFFFFFlu;
-	y[i] = ((unsigned long long int)950706376*i) % 0x7FFFFFFFlu;
+	x[i] = (double)(((unsigned long long int)950706376*i) % 0x7FFFFFFFlu);
+	y[i] = (double)(((unsigned long long int)870706376*i) % 0x7FFFFFFFlu);
 	}
 	
 }
@@ -36,14 +36,14 @@ __global__ void random_init(int n, int *x, int*y)
 
 // calculate points that are in the circle 
 
-__global__ void calculate_n(int n, int *x, int*y, int *num_points)
+__global__ void calculate_n(int n, double *x, double*y, int *num_points)
 {
 
 int i = blockIdx.x * blockDim.x + threadIdx.x; // Calculate current Thread
 
 if(i < n)
 	{
-		if(sqrt((float)(x[i]*x[i]) +(float)(y[i]*y[i])) <= 0x7FFFFFFFlu)
+		if(sqrt((double)(x[i]*x[i]) + (double)(y[i]*y[i])) <= (double)0x7FFFFFFFlu)
 			{
 				atomicAdd(num_points,1);	
 			}
@@ -57,16 +57,16 @@ int main(int argc, char* argv[])
 	// ============= INIT =====================
 
 	int sum = 0; 
-	int *random_points_x_d = NULL;
-	int *random_points_y_d = NULL;
+	double *random_points_x_d = NULL;
+	double *random_points_y_d = NULL;
 	int *num_points_d = NULL;
 	float pi =0; 
 
 	 	
 
 	//============TRANSFER======================
-	HANDLE_ERROR(cudaMalloc(&random_points_x_d, sizeof(int)*N)); // malloc of x_device
-	HANDLE_ERROR(cudaMalloc(&random_points_y_d , sizeof(int)*N)); // malloc of y_device
+	HANDLE_ERROR(cudaMalloc(&random_points_x_d, sizeof(double)*N)); // malloc of x_device
+	HANDLE_ERROR(cudaMalloc(&random_points_y_d , sizeof(double)*N)); // malloc of y_device
 
 	HANDLE_ERROR(cudaMalloc(&num_points_d, sizeof(int))); //malloc of n_points
 	HANDLE_ERROR(cudaMemcpy(num_points_d, &sum, sizeof(int), cudaMemcpyHostToDevice));
@@ -85,10 +85,10 @@ int main(int argc, char* argv[])
  
 	
 	HANDLE_ERROR(cudaMemcpy(&sum,num_points_d, sizeof(int), cudaMemcpyDeviceToHost));
-	pi = 4 * (sum / N) ;
+	pi = (float)4 * ((float)sum / (float) N) ;
 
-
-	printf("%f",pi);
+	printf("%d \n", sum);
+	printf("%f \n",pi);
 
 
 //=========CLEAN==============================
